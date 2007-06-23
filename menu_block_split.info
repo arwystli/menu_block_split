@@ -1,0 +1,4 @@
+; $Id$
+
+name = Menu block split
+description = Allow to have an splitted menu tree within two blocks

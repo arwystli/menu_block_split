@@ -1,0 +1,177 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Allow to have an splitted menu within two blocks
+ */
+ 
+/**
+ * Implementation of hook_perm
+ */
+function menu_block_split_perm() {
+  return array('administer menu block split');
+} 
+
+/**
+ * Implementation of hook_menu
+ */
+function menu_block_split_menu($may_cache) {
+  global $user;
+  $items = array();
+
+  if ($may_cache) {
+    $items[] = array(
+      'path' => 'admin/settings/mbs', 
+      'title' => t('Menu block split'),
+      'access' => user_access('maintain personal blog'),
+      'callback' => 'drupal_get_form',
+      'callback arguments' => array('menu_block_split_settings'),
+      'access' => user_access('administer menu block split')
+    ); 
+  }
+  return $items;
+}
+
+/**
+ * Settings form
+ */
+function menu_block_split_settings() {
+  $options = array(
+    1 => 1,
+    2 => 2,
+    3 => 3,
+    4 => 4,
+    5 => 5,
+    6 => 6,
+    7 => 7,
+    8 => 8,
+    9 => 9,
+    10 => 10
+  );
+  $form['mbs_howmany'] = array(
+    '#type' => 'select',
+    '#title' => t('How many blocks with first level menu do you need?'),
+    '#default_value' => variable_get('mbs_howmany', 1),
+    '#options' => $options,
+    '#description' => t('Set how many first menu level blocks do you need and click on the Save Configuration button to have the form available.')
+  );
+  unset($options);
+  $blocks = _block_rehash();
+  foreach ($blocks as $block) {
+    if ($block['module'] == 'menu') {
+      $options[$block['delta']] = $block['info'];
+    }
+  }
+  for ($i = 1; $i <= variable_get('mbs_howmany', 1); $i++) {
+    $form['mbs_fieldset_'. $i] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Menu Block Split !i', array('!i' => $i)),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+    );
+    $form['mbs_fieldset_'. $i]['mbs_'. $i] = array(
+      '#type' => 'select',
+      '#title' => t('Block'. $i),
+      '#options' => $options,
+      '#default_value' => variable_get('mbs_'. $i, ''),
+      '#description' => t('Choose a block as first level menu to split.'),
+      '#attributes' => array('onChange' => "auto=getElementById('edit-mbsinfo-". $i ."');mbsinfo=getElementById('edit-mbs-". $i ."').value;auto.value=mbsinfo"),
+    );
+    $form['mbs_fieldset_'. $i]['mbstitle_'. $i] = array(
+      '#type' => 'textfield',
+      '#title' => t('Title'. $i),
+      '#default_value' => variable_get('mbstitle_'. $i, ''),
+      '#required' => FALSE,
+      '#description' => t('Set the title of you resulting block.')
+    ); 
+  }
+  return system_settings_form($form);
+}
+
+function menu_block_split_block($op = 'list', $delta = 0, $edit = array()) {
+  
+  if ($op == 'list') {
+    for ($i = 1; $i <= variable_get('mbs_howmany', 1); $i++) { 
+      $mid = variable_get('mbs_'. $i, '');
+      $item = menu_get_item($mid);
+      $blocks[$i]['info'] = 'mbs-'. $item['title'] .'-1st';
+    }
+    $blocks[1000]['info'] = 'mbs-2nd';
+    return $blocks;
+  }
+  else if ($op == 'configure' && $delta == 0) {
+   
+  }
+  else if ($op == 'save' && $delta == 0) {
+    
+  }
+  else if ($op == 'view') {
+    switch ($delta) {
+      case $delta < 1000:
+        $block['subject'] = variable_get('mbstitle_'. $delta, '');
+        $block['content'] = theme(menu_block_split_first_level_menu, variable_get('mbs_'. $delta, ''));
+        break;
+      case 1000:
+        $mid = menu_get_active_nontask_item();
+        if (menu_block_split_is_first_level($mid)) {
+          $item = menu_get_item($mid);
+          $block['subject'] = $item['title'];
+          $block['content'] = theme('menu_tree', $mid);
+        }
+        else {
+          $menu = menu_get_menu();
+          $menu = $menu['visible'];
+          foreach ($menu as $key => $value) {
+            if (menu_in_active_trail($key) && menu_block_split_is_first_level($key)) {
+              $block['subject'] = menu_block_split_block_title($key, false);
+              $block['content'] = theme('menu_tree', $key);
+            } 
+          }
+        }
+    }
+    return $block;
+  }
+}
+
+function menu_block_split_first_level_menu_tree($pid = 1) {
+  $menu = menu_get_menu();
+  $output = '';
+
+  if (isset($menu['visible'][$pid]) && $menu['visible'][$pid]['children']) {
+    foreach ($menu['visible'][$pid]['children'] as $mid) {
+      $output .= theme('menu_item', $mid);
+    }
+  }
+
+  return $output;
+}
+
+function theme_menu_block_split_first_level_menu($pid = 1) {
+  if ($tree = menu_block_split_first_level_menu_tree($pid)) {
+    return "\n<ul class=\"menu\">\n". $tree ."\n</ul>\n";
+  }
+}
+
+function menu_block_split_is_first_level($mid) {
+  $item = menu_get_item($mid);
+  $parent = menu_get_item($item['pid']);
+  if ($parent['pid'] == 0) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+function menu_block_split_is_second_level($mid) {
+  $item = menu_get_item($mid);
+  return menu_block_split_is_first_level($item['pid']);
+}
+
+function menu_block_split_block_title($mid, $parent) {
+  $item = menu_get_item($mid);
+  $parent_item = menu_get_item($item['pid']);
+  $title = ($parent) ? $parent_item['title'] : $item['title'];
+  return $title;
+}
