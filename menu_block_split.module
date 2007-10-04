@@ -112,21 +112,26 @@ function menu_block_split_block($op = 'list', $delta = 0, $edit = array()) {
         $block['subject'] = variable_get('mbstitle_'. $delta, '');
         $block['content'] = theme(menu_block_split_first_level_menu, variable_get('mbs_'. $delta, ''));
         break;
-      case 1000:
+      case 1000:  
         $mid = menu_get_active_nontask_item();
-        if (menu_block_split_is_first_level($mid)) {
-          $item = menu_get_item($mid);
-          $block['subject'] = $item['title'];
-          $block['content'] = theme('menu_tree', $mid);
-        }
-        else {
-          $menu = menu_get_menu();
-          $menu = $menu['visible'];
-          foreach ($menu as $key => $value) {
-            if (menu_in_active_trail($key) && menu_block_split_is_first_level($key)) {
-              $block['subject'] = menu_block_split_block_title($key, false);
-              $block['content'] = theme('menu_tree', $key);
-            } 
+        for ($i = 1; $i <= variable_get('mbs_howmany', 1); $i++) {
+          $pid = variable_get('mbs_'. $i, '');
+          if (menu_block_split_is_child($pid, $mid)) {
+            if (menu_block_split_is_first_level($mid)) {
+              $item = menu_get_item($mid);
+              $block['subject'] = $item['title'];
+              $block['content'] = theme('menu_tree', $mid);
+            }
+            else {
+              $menu = menu_get_menu();
+              $menu = $menu['visible'];
+              foreach ($menu as $key => $value) {
+                if (menu_in_active_trail($key) && menu_block_split_is_first_level($key)) {
+                  $block['subject'] = menu_block_split_block_title($key, false);
+                  $block['content'] = theme('menu_tree', $key);
+                } 
+              }
+            }
           }
         }
     }
@@ -143,7 +148,6 @@ function menu_block_split_first_level_menu_tree($pid = 1) {
       $output .= theme('menu_item', $mid);
     }
   }
-
   return $output;
 }
 
@@ -174,4 +178,19 @@ function menu_block_split_block_title($mid, $parent) {
   $parent_item = menu_get_item($item['pid']);
   $title = ($parent) ? $parent_item['title'] : $item['title'];
   return $title;
+}
+
+function menu_block_split_is_child($parent, $child) {
+  $item = menu_get_item($parent);
+  if (is_array($item['children'])) {
+    if (in_array($child, $item['children'])) {
+      return TRUE;
+    }
+    else {
+      foreach ($item['children'] as $c) {
+        return menu_block_split_is_child($c, $child);
+      }
+    }
+  }
+ return FALSE;
 }
