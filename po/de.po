@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of menu block split\n"
 "POT-Creation-Date: 2007-12-02 18:34+0100\n"
-"PO-Revision-Date: 2007-12-02 19:29+0100\n"
+"PO-Revision-Date: 2007-12-02 20:01+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: Alexander Hass\n"
 "MIME-Version: 1.0\n"
@@ -23,7 +23,7 @@ msgstr ""
 #: menu_block_split.module:26
 #: menu_block_split.info:0
 msgid "Menu block split"
-msgstr "Menüblock teilen"
+msgstr "Menüblockteilung"
 
 #: menu_block_split.module:54
 msgid "How many blocks with first level menu do you need?"
@@ -55,7 +55,7 @@ msgstr "Einen Titel für den resultierenden Block angeben."
 
 #: menu_block_split.module:13
 msgid "administer menu block split"
-msgstr "Geteilte Menüblöcke verwalten"
+msgstr "Verwalten geteilter Menüblöcke"
 
 #: menu_block_split.module:0
 msgid "menu_block_split"
