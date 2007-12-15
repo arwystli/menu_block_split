@@ -1,0 +1,12 @@
+<?php
+//$Id$
+
+function menu_block_split_uninstall() {
+  variable_del('mbs_howmany');
+  
+  for ($i = 1; $i <= 10; $i++) {
+    variable_del('mbstitle_'. $i);
+    variable_del('mbs_'. $i);
+  }
+
+}
