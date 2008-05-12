@@ -1,8 +1,18 @@
-Menu Block Split 5.x-1.1
+$Id$
+
+2008-5-12
+---------
+
+  o #201822: (by casey) disappearing menu blocks bug fix
+
+5.x-1.1
+-------
   
   o #197087: (by hass) Module description is missing on admin/settings
   o #197090: (by hass) "onChange" causes XHTML validation error
   o #197086: (by hass) hook_uninstall is missing
 
-Menu Block Split 5.x-1.0
+5.x-1.0
+-------
+
   Initial release under the new release system.

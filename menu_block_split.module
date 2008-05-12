@@ -189,9 +189,11 @@ function menu_block_split_is_child($parent, $child) {
     }
     else {
       foreach ($item['children'] as $c) {
-        return menu_block_split_is_child($c, $child);
+        if (menu_block_split_is_child($c, $child) == TRUE) {
+          return TRUE;
+        }
       }
     }
   }
- return FALSE;
+return FALSE;
 }
