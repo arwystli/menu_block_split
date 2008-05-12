@@ -4,6 +4,8 @@
 /**
  * @file
  * Allow to have an splitted menu within two blocks
+ * Developed by Robert Garrigos <robert@garrigos.cat>
+ * http://robert.garrigos.cat
  */
  
 /**
@@ -58,11 +60,13 @@ function menu_block_split_settings() {
     '#description' => t('Set how many first menu level blocks do you need and click on the Save Configuration button to have the form available.')
   );
   unset($options);
-  $blocks = _block_rehash();
-  foreach ($blocks as $block) {
-    if ($block['module'] == 'menu') {
-      $options[$block['delta']] = $block['info'];
-    }
+  //$blocks = _block_rehash();
+  $menu = menu_get_menu();
+  foreach ($menu['items'] as $pid => $item) {
+    if (isset($menu['visible'][$pid]) && $item['children'] && ($pid > 0)) {
+      // TODO: indented representation of the menu title
+      $options[$pid] = $item['title'];
+    }  
   }
   for ($i = 1; $i <= variable_get('mbs_howmany', 1); $i++) {
     $form['mbs_fieldset_'. $i] = array(

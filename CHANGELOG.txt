@@ -1,6 +1,6 @@
 $Id$
 
-2008-5-12
+5.x-1.2
 ---------
 
   o #201822: (by casey) disappearing menu blocks bug fix
