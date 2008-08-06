@@ -128,10 +128,12 @@ function menu_block_split_block($op = 'list', $delta = 0, $edit = array()) {
           $module = ($menu_name == 'navigation') ? 'system' : 'menu';
           $current_menu_item = menu_block_split_get_menu_link_info($current_router_item['href'], $module);
           $parent = menu_block_split_get_parent($current_menu_item);
+          var_dump($parent);
           if($menu_name == $current_menu_item['menu_name']) { 
             if(menu_block_split_has_child($parent)) {// parent has a child?
               $second_level_tree = menu_block_split_second_level_tree(menu_tree_page_data($menu_name), $parent);
-              $block['subject'] = $current_menu_item['link_title'];
+              //$block['subject'] = $current_menu_item['link_title'];
+              $block['subject'] = menu_block_split_get_menu_title($parent);
               $block['content'] = menu_tree_output($second_level_tree);
             }
           }
@@ -225,4 +227,16 @@ function menu_block_split_get_parent($current_menu_item) {
   }  
   
   return $parent_mlid;
+}
+
+/**
+ * returns the title of a given menu link id.
+ *
+ * @param $
+ *   int: menu link id.
+ * @return
+ *   string.
+ */
+function menu_block_split_get_menu_title($mlid) {
+  return db_result(db_query("SELECT link_title FROM {menu_links} WHERE mlid = %d", $mlid));
 }
