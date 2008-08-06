@@ -5,34 +5,32 @@
  * @file
  * Allow to have an splitted menu within two blocks
  * Developed by Robert Garrigos <robert@garrigos.cat>
- * http://robert.garrigos.cat
+ * Modified for Drupal 6.x by Frank Meyerer <meyerer@digi-info.de>
+ * http://www.digi-info.de
  */
  
 /**
- * Implementation of hook_perm
+ * Implementation of hook_perm()
  */
 function menu_block_split_perm() {
-  return array('administer menu block split module.');
-} 
+  return array('administer menu block split');
+}
 
 /**
  * Implementation of hook_menu
  */
-function menu_block_split_menu($may_cache) {
-  global $user;
+function menu_block_split_menu() {
   $items = array();
-
-  if ($may_cache) {
-    $items[] = array(
-      'path' => 'admin/settings/mbs', 
-      'title' => t('Menu block split'),
-      'access' => user_access('maintain personal blog'),
-      'callback' => 'drupal_get_form',
-      'callback arguments' => array('menu_block_split_settings'),
-      'access' => user_access('administer menu block split'),
-      'description' => t('Settings for Menu Block Split'),
-    ); 
-  }
+  
+  $items['admin/settings/menu_block_split'] = array(
+    'title' => t('Menu block split'),
+    'description' => t('Settings for Menu Block Split'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('menu_block_split_settings'),
+    'access arguments' => array('administer menu block split'),
+    'type' => MENU_NORMAL_ITEM,
+  ); 
+    
   return $items;
 }
 
@@ -52,41 +50,40 @@ function menu_block_split_settings() {
     9 => 9,
     10 => 10
   );
-  $form['mbs_howmany'] = array(
+  $form['menu_block_split_howmany'] = array(
     '#type' => 'select',
     '#title' => t('How many blocks with first level menu do you need?'),
-    '#default_value' => variable_get('mbs_howmany', 1),
+    '#default_value' => variable_get('menu_block_split_howmany', 1),
     '#options' => $options,
     '#description' => t('Set how many first menu level blocks do you need and click on the Save Configuration button to have the form available.')
   );
   unset($options);
-  //$blocks = _block_rehash();
-  $menu = menu_get_menu();
-  foreach ($menu['items'] as $pid => $item) {
-    if (isset($menu['visible'][$pid]) && $item['children'] && ($pid > 0)) {
-      // TODO: indented representation of the menu title
-      $options[$pid] = $item['title'];
+  $menu_names = menu_get_menus();
+  foreach($menu_names as $name => $title) {
+    $menuinfo = menu_navigation_links($name);
+    if(count($menuinfo) > 0) {
+        $options[$name] = $title;
     }  
   }
-  for ($i = 1; $i <= variable_get('mbs_howmany', 1); $i++) {
-    $form['mbs_fieldset_'. $i] = array(
+  for ($i = 1; $i <= variable_get('menu_block_split_howmany', 1); $i++) {
+    $form['menu_block_split_fieldset_'. $i] = array(
       '#type' => 'fieldset',
       '#title' => t('Menu Block Split !i', array('!i' => $i)),
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
     );
-    $form['mbs_fieldset_'. $i]['mbs_'. $i] = array(
+    $form['menu_block_split_fieldset_'. $i]['menu_block_split_'. $i] = array(
       '#type' => 'select',
       '#title' => t('Block'. $i),
       '#options' => $options,
-      '#default_value' => variable_get('mbs_'. $i, ''),
+      '#default_value' => variable_get('menu_block_split_'. $i, ''),
       '#description' => t('Choose a block as first level menu to split.'),
-      '#attributes' => array('onchange' => "auto=getElementById('edit-mbsinfo-". $i ."');mbsinfo=getElementById('edit-mbs-". $i ."').value;auto.value=mbsinfo"),
+      '#attributes' => array('onchange' => "auto=getElementById('edit-menu_block_splitinfo-". $i ."');menu_block_splitinfo=getElementById('edit-menu_block_split-". $i ."').value;auto.value=menu_block_splitinfo"),
     );
-    $form['mbs_fieldset_'. $i]['mbstitle_'. $i] = array(
+    $form['menu_block_split_fieldset_'. $i]['menu_block_splittitle_'. $i] = array(
       '#type' => 'textfield',
       '#title' => t('Title'. $i),
-      '#default_value' => variable_get('mbstitle_'. $i, ''),
+      '#default_value' => variable_get('menu_block_splittitle_'. $i, ''),
       '#required' => FALSE,
       '#description' => t('Set the title of you resulting block.')
     ); 
@@ -94,15 +91,22 @@ function menu_block_split_settings() {
   return system_settings_form($form);
 }
 
+function menu_block_split_theme() {
+  $functions = array(
+    'menu_block_split_first_level_menu' => array('arguments' => array('menu_name' => ''))
+  );
+  return $functions;
+}
+
 function menu_block_split_block($op = 'list', $delta = 0, $edit = array()) {
   
   if ($op == 'list') {
-    for ($i = 1; $i <= variable_get('mbs_howmany', 1); $i++) { 
-      $mid = variable_get('mbs_'. $i, '');
-      $item = menu_get_item($mid);
-      $blocks[$i]['info'] = 'mbs-'. $item['title'] .'-1st';
+    for ($i = 1; $i <= variable_get('menu_block_split_howmany', 1); $i++) { 
+      $mid = variable_get('menu_block_split_'. $i, '');
+      $item = menu_load($mid);
+      $blocks[$i]['info'] = 'MBS-'. $item['title'] .'-1st';
     }
-    $blocks[1000]['info'] = 'mbs-2nd';
+    $blocks[1000]['info'] = 'MBS-2nd';
     return $blocks;
   }
   else if ($op == 'configure' && $delta == 0) {
@@ -114,90 +118,111 @@ function menu_block_split_block($op = 'list', $delta = 0, $edit = array()) {
   else if ($op == 'view') {
     switch ($delta) {
       case $delta < 1000:
-        $block['subject'] = variable_get('mbstitle_'. $delta, '');
-        $block['content'] = theme(menu_block_split_first_level_menu, variable_get('mbs_'. $delta, ''));
+        $block['subject'] = variable_get('menu_block_splittitle_'. $delta, '');
+        $block['content'] = theme('menu_block_split_first_level_menu', variable_get('menu_block_split_'. $delta, ''));
         break;
       case 1000:
-        $mid = menu_get_active_nontask_item();
-        for ($i = 1; $i <= variable_get('mbs_howmany', 1); $i++) {
-          $pid = variable_get('mbs_'. $i, '');
-          if (menu_block_split_is_child($pid, $mid)) {
-            if (menu_block_split_is_first_level($mid)) {
-              $item = menu_get_item($mid);
-              $block['subject'] = $item['title'];
-              $block['content'] = theme('menu_tree', $mid);
-            }
-            else {
-              $menu = menu_get_menu();
-              $menu = $menu['visible'];
-              foreach ($menu as $key => $value) {
-                if (menu_in_active_trail($key) && menu_block_split_is_first_level($key)) {
-                  $block['subject'] = menu_block_split_block_title($key, false);
-                  $block['content'] = theme('menu_tree', $key);
-                } 
-              }
+        $current_router_item = menu_get_item();
+        for ($i = 1; $i <= variable_get('menu_block_split_howmany', 1); $i++) {
+          $menu_name = variable_get('menu_block_split_'. $i, '');
+          $module = ($menu_name == 'navigation') ? 'system' : 'menu';
+          $current_menu_item = menu_block_split_get_menu_link_info($current_router_item['href'], $module);
+          $parent = menu_block_split_get_parent($current_menu_item);
+          if($menu_name == $current_menu_item['menu_name']) { 
+            if(menu_block_split_has_child($parent)) {// parent has a child?
+              $second_level_tree = menu_block_split_second_level_tree(menu_tree_page_data($menu_name), $parent);
+              $block['subject'] = $current_menu_item['link_title'];
+              $block['content'] = menu_tree_output($second_level_tree);
             }
           }
         }
     }
-    return $block;
+    return isset($block) ? $block : NULL;
   }
 }
 
-function menu_block_split_first_level_menu_tree($pid = 1) {
-  $menu = menu_get_menu();
+function menu_block_split_first_level_menu_tree($menu_name = '') {
+  
+  $menu_items = menu_navigation_links($menu_name,0);
   $output = '';
-
-  if (isset($menu['visible'][$pid]) && $menu['visible'][$pid]['children']) {
-    foreach ($menu['visible'][$pid]['children'] as $mid) {
-      $output .= theme('menu_item', $mid);
+  
+  $i = 1;
+  $menu_count = count($menu_items);
+  foreach ($menu_items as $k => $v) {
+    
+    $link = theme('menu_item_link', $v);
+    
+    $in_active_trail = FALSE;
+    if((isset($v['attributes']) && isset($v['attributes']['class'])) && ($v['attributes']['class'] == 'active-trail')) {
+      $in_active_trail = TRUE;
     }
+    
+    if($i == 1) {
+     $extra_class = 'first';
+    }
+    elseif($i == $menu_count) {
+      $extra_class = 'last';
+    }
+    else {
+     $extra_class = ''; 
+    }
+    
+    $output .= theme('menu_item', $link, 0, '', $in_active_trail, $extra_class);
+    
+    $i++;
   }
+  
   return $output;
 }
 
-function theme_menu_block_split_first_level_menu($pid = 1) {
-  if ($tree = menu_block_split_first_level_menu_tree($pid)) {
+function theme_menu_block_split_first_level_menu($menu_name = '') {
+  if ($tree = menu_block_split_first_level_menu_tree($menu_name)) {
     return "\n<ul class=\"menu\">\n". $tree ."\n</ul>\n";
   }
 }
 
-function menu_block_split_is_first_level($mid) {
-  $item = menu_get_item($mid);
-  $parent = menu_get_item($item['pid']);
-  if ($parent['pid'] == 0) {
-    return TRUE;
-  }
-  else {
+function menu_block_split_has_child($parent) {
+  
+  $menu_info = db_fetch_object(db_query("SELECT has_children FROM {menu_links} WHERE mlid = '%d'", $parent));
+  if($menu_info->has_children == 0) {
     return FALSE;
   }
+  return TRUE;
 }
 
-function menu_block_split_is_second_level($mid) {
-  $item = menu_get_item($mid);
-  return menu_block_split_is_first_level($item['pid']);
+function menu_block_split_get_menu_link_info($path, $module = 'menu') {
+
+  $link_info = db_fetch_array(db_query("SELECT menu_name, mlid, plid, link_path, router_path, link_title, options, module, hidden, external, has_children, expanded, weight, depth, customized, p1, p2, p3, p4, p5, p6, p7, p8, p9, updated FROM {menu_links} WHERE link_path = '%s' AND module = '%s'", $path, $module));
+  
+  return $link_info;
 }
 
-function menu_block_split_block_title($mid, $parent) {
-  $item = menu_get_item($mid);
-  $parent_item = menu_get_item($item['pid']);
-  $title = ($parent) ? $parent_item['title'] : $item['title'];
-  return $title;
-}
-
-function menu_block_split_is_child($parent, $child) {
-  $item = menu_get_item($parent);
-  if (is_array($item['children'])) {
-    if (in_array($child, $item['children'])) {
-      return TRUE;
-    }
-    else {
-      foreach ($item['children'] as $c) {
-        if (menu_block_split_is_child($c, $child) == TRUE) {
-          return TRUE;
-        }
-      }
+function menu_block_split_second_level_tree($tree, $mlid) {
+  
+  // why is this here, which is not being used in this function?  
+  //$menus = menu_get_menus();
+  //$current_menu = array($current_menu_item['menu_name'] => $menus[$current_menu_item['menu_name']]);
+  
+  foreach($tree as $key => $value) {
+    if($value['link']['mlid'] == $mlid)
+    {
+      $second_level_tree = $tree[$key]['below'];
     }
   }
-return FALSE;
+  
+  return $second_level_tree;
+}
+
+function menu_block_split_get_parent($current_menu_item) {
+  
+  if($current_menu_item['plid'] != 0) {
+    $menu_infos = db_fetch_array(db_query("SELECT mlid, plid FROM {menu_links} WHERE mlid = '%d'", $current_menu_item['plid']));
+    $parent_mlid = menu_block_split_get_parent($menu_infos);
+  }
+  else
+  {
+    $parent_mlid = $current_menu_item['mlid'];
+  }  
+  
+  return $parent_mlid;
 }
