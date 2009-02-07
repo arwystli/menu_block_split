@@ -24,7 +24,6 @@ function menu_block_split_menu($may_cache) {
     $items[] = array(
       'path' => 'admin/settings/mbs', 
       'title' => t('Menu block split'),
-      'access' => user_access('maintain personal blog'),
       'callback' => 'drupal_get_form',
       'callback arguments' => array('menu_block_split_settings'),
       'access' => user_access('administer menu block split'),
@@ -38,23 +37,11 @@ function menu_block_split_menu($may_cache) {
  * Settings form
  */
 function menu_block_split_settings() {
-  $options = array(
-    1 => 1,
-    2 => 2,
-    3 => 3,
-    4 => 4,
-    5 => 5,
-    6 => 6,
-    7 => 7,
-    8 => 8,
-    9 => 9,
-    10 => 10
-  );
   $form['mbs_howmany'] = array(
     '#type' => 'select',
     '#title' => t('How many blocks with first level menu do you need?'),
     '#default_value' => variable_get('mbs_howmany', 1),
-    '#options' => $options,
+    '#options' => range(0, 10),
     '#description' => t('Set how many first menu level blocks do you need and click on the Save Configuration button to have the form available.')
   );
   unset($options);
