@@ -1,5 +1,13 @@
 $Id$
 
+7-Feb-09
+---------
+
+  o #313778: (by demeester_roel) added a fix for http://drupal.org/node/184955
+  o Changed function name get_first_level to menu_block_split_get_first_level to avoid any possible conflict
+  o Added a conditional in that function to avoid a missing index error message
+  o Added the hook_help
+
 6.x-1.1
 ---------
 
