@@ -1,5 +1,10 @@
 $Id$
 
+6.x-1.1
+---------
+
+  o #313778: (by demeester_roel and mikl) rewritte of part of the code
+
 5.x-1.2
 ---------
 
