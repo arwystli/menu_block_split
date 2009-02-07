@@ -163,12 +163,13 @@ function menu_block_split_block($op = 'list', $delta = 0, $edit = array()) {
           );
         }
       }
+      return $block;
       break;
 
     case 'cache':
       return BLOCK_NO_CACHE;
   }
-  return $block;
+  
 }
 
 /**
@@ -200,12 +201,14 @@ function menu_block_split_render_tree($tree, $level) {
       $link = theme('menu_item_link', $mid['link']);
       // our first block
       if ($level > 0) {
-        $output .= theme('menu_item', $link, '');
+        //var_dump($mid);
+        $extra_class = 'menu-' . $mid['link']['mlid'];
+        $output .= theme('menu_item', $link, '', '', FALSE, $extra_class);
       }
       // sub block
       else {
         if ($mid['below']) {
-          $output .= menu_tree_output($mid['below'], $level);
+          $output .= menu_block_split_menu_tree_output($mid['below']);
         }
       }
     }
@@ -223,9 +226,11 @@ function menu_block_split_render_tree($tree, $level) {
  * @return title
  */
 function menu_block_split_get_first_level($trail) {
-  if (isset($trail[1]['mlid'])) {
-    return array('mlid' => $trail[1]['mlid'], 'title' => $trail[1]['title']);
-  }
+    $info = array(
+      'mlid' => isset($trail[1]['mlid']) ? $trail[1]['mlid'] : NULL,
+      'title' => $trail[1]['title']
+    );
+    return $info;
 }
 
 /**
@@ -240,5 +245,49 @@ function menu_block_split_help($page, $arg) {
       $output .= '<p>'. t('Once you set how many first level menu blocks you need you can go to the <a href="@blocks">blocks admin page</a> to admin your new blocks. You should find a new Menu Block Split second level block and as many Menu Block Split first level blocks as you set.', array('@blocks' => url('admin/build/block'))) .'</p>';
       return $output;
   }
+}
+
+/**
+ * outputs a menu tree.
+ *
+ * @param $
+ *   description of parameter.
+ * @param $
+ *   description of parameter.
+ * @param $
+ *   description of parameter.
+ * @return
+ *   description of return value.
+ */
+function menu_block_split_menu_tree_output($tree) {
+  $output = '';
+  $items = array();
+
+  // Pull out just the menu items we are going to render so that we
+  // get an accurate count for the first/last classes.
+  foreach ($tree as $data) {
+    if (!$data['link']['hidden']) {
+      $items[] = $data;
+    }
+  }
+
+  $num_items = count($items);
+  foreach ($items as $i => $data) {
+    $extra_class = NULL;
+    if ($i == 0) {
+      $extra_class = 'first menu-' . $data['link']['mlid'];
+    }
+    if ($i == $num_items - 1) {
+      $extra_class = 'last menu-' . $data['link']['mlid'];
+    }
+    $link = theme('menu_item_link', $data['link']);
+    if ($data['below']) {
+      $output .= theme('menu_item', $link, $data['link']['has_children'], menu_tree_output($data['below']), $data['link']['in_active_trail'], $extra_class);
+    }
+    else {
+      $output .= theme('menu_item', $link, $data['link']['has_children'], '', $data['link']['in_active_trail'], $extra_class);
+    }
+  }
+  return $output ? theme('menu_tree', $output) : '';
 }
 
