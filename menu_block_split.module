@@ -295,6 +295,6 @@ function menu_block_split_menu_tree_output($tree) {
       $output .= theme('menu_item', $link, $data['link']['has_children'], '', $data['link']['in_active_trail'], $extra_class);
     }
   }
-  return $output ? theme('menu_tree', $output) : '';
+  return $output;
 }
 
