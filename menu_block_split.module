@@ -200,12 +200,19 @@ function menu_block_split_render_tree($tree, $level) {
   $output = '';
 
   $num_items = count($tree);
+  $n = 1;
   foreach ($tree as $i => $mid) {
     if ($mid['link']['hidden'] == 0) {
       $link = theme('menu_block_split_menu_item_link', $mid['link']);
       // our first block
       if ($level > 0) {
         $extra_class = 'menu-'. $mid['link']['mlid'];
+        if ($n == 1) {
+          $extra_class .= ' first ';
+        }
+        if ($n == $num_items) {
+          $extra_class .= ' last ';
+        }
         $trail = menu_get_active_trail();
         foreach ($trail as $item) {
           if (isset($item['mlid'])) {
@@ -223,6 +230,7 @@ function menu_block_split_render_tree($tree, $level) {
         }
       }
     }
+    $n++;
   }
   if ($output) {
     return "\n<ul class=\"menu\">\n". $output ."\n</ul>\n";
