@@ -19,7 +19,7 @@
  */
 
 /**
- * Implementation of hook_init
+ * Implementation of hook_init()
  */
 function menu_block_split_init() {
   $menu_name = menu_block_split_menu_name();
@@ -29,7 +29,7 @@ function menu_block_split_init() {
 }
 
 /*
- * Returns the menu_name to which the current menu-item belongs. 
+ * Returns the menu_name to which the current menu-item belongs.
  */
 function menu_block_split_menu_name() {
   $item = menu_get_item();
@@ -111,20 +111,29 @@ function menu_block_split_settings() {
     );
     $form['menu_block_split_fieldset_'. $i]['menu_block_split_'. $i] = array(
       '#type' => 'select',
-      '#title' => t('Block'. $i),
+      '#title' => t('Block!i', array('!i' => $i)),
       '#options' => $menu_select_options,
       '#default_value' => variable_get('menu_block_split_'. $i, ''),
       '#description' => t('Choose a block as first level menu to split.'),
     );
+    $default = check_plain(variable_get('menu_block_splittitle_'. $i, ''));
     $form['menu_block_split_fieldset_'. $i]['menu_block_splittitle_'. $i] = array(
       '#type' => 'textfield',
-      '#title' => t('Title') .' '. $i,
-      '#default_value' => variable_get('menu_block_splittitle_'. $i, ''),
+      '#title' => t('Title !i', array('!i' => $i)),
+      '#default_value' => $default,
       '#required' => FALSE,
       '#description' => t('Set the title of the resulting block.'),
     );
   }
+  $form['#validate'][] = 'menu_block_split_settings_validate';
   return system_settings_form($form);
+}
+
+function menu_block_split_settings_validate($form, &$form_state) {
+  $howmany = $form_state['values']['menu_block_split_howmany'];
+  for ($i = 1; $i <= $howmany; $i++) {
+    $form_state['values']['menu_block_splittitle_'. $i] = check_plain($form_state['values']['menu_block_splittitle_'. $i]);
+  }
 }
 
 /**
@@ -135,8 +144,8 @@ function menu_block_split_block($op = 'list', $delta = 0, $edit = array()) {
   switch ($op) {
     case 'list':
       for ($i = 1; $i <= variable_get('menu_block_split_howmany', 1); $i++) {
-        $mid                = variable_get('menu_block_split_'. $i, '');
-        $item               = menu_load($mid);
+        $mid = variable_get('menu_block_split_'. $i, '');
+        $item = menu_load($mid);
         $blocks[$i]['info'] = 'Menu block split 1st level ('. $item['title'] .')';
       }
       $blocks[0]['info'] = 'Menu block split 2nd level';
@@ -145,8 +154,8 @@ function menu_block_split_block($op = 'list', $delta = 0, $edit = array()) {
     case 'view':
       // Delta 0 is the 2nd level block
       if ($delta > 0) {
-        $tree             = menu_tree_page_data(variable_get('menu_block_split_'. $delta, ''));
-        $block['subject'] = variable_get('menu_block_splittitle_'. $delta, '');
+        $tree = menu_tree_page_data(variable_get('menu_block_split_'. $delta, ''));
+        $block['subject'] = check_plain(variable_get('menu_block_splittitle_'. $delta, ''));
         $block['content'] = theme('menu_block_split_menu',
           variable_get('menu_block_split_'. $delta, ''),
           $tree, $delta
@@ -160,9 +169,9 @@ function menu_block_split_block($op = 'list', $delta = 0, $edit = array()) {
           if ($active != $name) {
             menu_set_active_menu_name($name);
           }
-          $trail            = menu_get_active_trail();
-          $tree             = menu_tree_page_data($name);
-          $info             = menu_block_split_get_first_level($trail);
+          $trail = menu_get_active_trail();
+          $tree = menu_tree_page_data($name);
+          $info = menu_block_split_get_first_level($trail);
           $block['subject'] = $info['title'];
           $block['content'] = theme('menu_block_split_menu',
             $name, $tree, $delta
@@ -334,7 +343,6 @@ function theme_menu_block_split_menu_item_link($link) {
   if (empty($link['localized_options'])) {
     $link['localized_options'] = array();
   }
-
   return l($link['title'], $link['href'], $link['localized_options']);
 }
 
