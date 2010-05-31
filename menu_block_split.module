@@ -70,8 +70,8 @@ function menu_block_split_menu() {
   $items = array();
 
   $items['admin/settings/menu_block_split'] = array(
-    'title' => t('Menu block split settings'),
-    'description' => t('Settings for Menu Block Split'),
+    'title' => 'Menu block split settings',
+    'description' => 'Settings for Menu Block Split',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('menu_block_split_settings'),
     'access arguments' => array('administer menu block split'),
