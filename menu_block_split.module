@@ -168,16 +168,14 @@ function menu_block_split_block($op = 'list', $delta = 0, $edit = array()) {
         for ($i = 1; $i <= $howmany; $i++) {
           $name = variable_get('menu_block_split_'. $i, '');
           $active = menu_get_active_menu_name();
-          if ($active != $name) {
-            menu_set_active_menu_name($name);
+          if ($active == $name) {
+            $trail = menu_get_active_trail();
+            $tree = menu_tree_page_data($name);
+            $info = menu_block_split_get_first_level($trail);
+            $block['subject'] = $info['title'];
+            $block['content'] = theme('menu_block_split_menu', $name, $tree, $delta );
+            return $block;
           }
-          $trail = menu_get_active_trail();
-          $tree = menu_tree_page_data($name);
-          $info = menu_block_split_get_first_level($trail);
-          $block['subject'] = $info['title'];
-          $block['content'] = theme('menu_block_split_menu',
-            $name, $tree, $delta
-          );
         }
       }
       return $block;
