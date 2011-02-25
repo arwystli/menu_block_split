@@ -1,5 +1,4 @@
 <?php
-//$Id$
 
 function menu_block_split_uninstall() {
   variable_del('mbs_howmany');
