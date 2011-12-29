@@ -8,7 +8,10 @@
 
 function menu_block_split_uninstall() {
   // delete entries from variable table
-  db_query("DELETE FROM {variable} WHERE name LIKE 'menu_block_split%';");
+  //db_query("DELETE FROM {variable} WHERE name LIKE 'menu_block_split%';");
+  $query = db_delete('variable')
+    ->condition('name', 'menu_block_split%', 'LIKE')
+    ->execute();
 }
 
 function menu_block_split_update_6000() {

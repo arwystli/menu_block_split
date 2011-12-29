@@ -1,4 +1,7 @@
-
 name = Menu block split
-description = Allow to have an splitted menu tree within two blocks
-core = 6.x
+description = Split a menu tree over two blocks
+package = Other
+core = 7.x
+php = 5
+dependencies[] = menu
+
