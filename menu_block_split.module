@@ -1,5 +1,4 @@
 <?php
-// $Name$
 
 /**
  * @file
@@ -173,6 +172,7 @@ function menu_block_split_block_info() {
  */
 function menu_block_split_block_view($delta = '') {
   $howmany = variable_get('menu_block_split_howmany', 1);
+  $block = '';
   // Delta 0 is the 2nd level block
   if ($delta > 0) {
     $tree = menu_tree_page_data(variable_get('menu_block_split_'. $delta, ''));

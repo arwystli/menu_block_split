@@ -1,5 +1,5 @@
-name = Menu block split
-description = Split a menu tree over two blocks
+name = Menu Block Split
+description = Split a menu tree over two blocks.
 package = Other
 core = 7.x
 php = 5
