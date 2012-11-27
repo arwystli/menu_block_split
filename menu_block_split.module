@@ -196,7 +196,7 @@ function menu_block_split_render_tree($tree, $level) {
 
   $output = '';
 
-  $num_items = count($tree);
+  $num_items = menu_block_split_count_active_items($tree);
   $n = 1;
   foreach ($tree as $i => $mid) {
     if ($mid['link']['hidden'] == 0) {
@@ -228,6 +228,22 @@ function menu_block_split_render_tree($tree, $level) {
     $n++;
   }
   return $output;
+}
+
+/**
+ * Count the number of active items in a menu.
+ *
+ * @param array $tree
+ * @return int
+ */
+function menu_block_split_count_active_items($tree) {
+  $count = 0;
+  foreach($tree as $item) {
+    if ($item['link']['hidden'] == 0) {
+      $count++;
+    }
+  }
+  return $count;
 }
 
 /**
