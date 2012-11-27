@@ -1,4 +1,12 @@
-commit 2528e14
+commit b6eb1db
+Author: hutch <hutch@midwales.net>
+Date:   Tue Nov 27 15:01:35 2012 +0000
+
+    fixed count bug #1851654
+
+menu_block_split.module
+
+commit f7775fb
 Author: hutch <hutch@midwales.net>
 Date:   Fri Dec 30 22:40:16 2011 +0000
 
