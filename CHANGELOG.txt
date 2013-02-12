@@ -1,9 +1,18 @@
-commit b6eb1db
+commit 95ecb93
+Author: hutch <hutch@midwales.net>
+Date:   Tue Feb 12 22:08:06 2013 +0000
+
+    fixed issue #1907916
+
+menu_block_split.module
+
+commit dc66b11
 Author: hutch <hutch@midwales.net>
 Date:   Tue Nov 27 15:01:35 2012 +0000
 
     fixed count bug #1851654
 
+CHANGELOG.txt
 menu_block_split.module
 
 commit f7775fb

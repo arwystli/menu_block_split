@@ -286,8 +286,8 @@ function menu_block_split_count_active_items($tree) {
  */
 function menu_block_split_get_first_level($trail) {
   $info = array(
-    'mlid' => isset($trail[1]['mlid']) ? $trail[1]['mlid'] : NULL,
-    'title' => $trail[1]['title'],
+    'mlid' => (isset($trail[1]['mlid']) ? $trail[1]['mlid'] : NULL),
+    'title' => (isset($trail[1]['title']) ? $trail[1]['title'] : ''),
   );
   return $info;
 }
