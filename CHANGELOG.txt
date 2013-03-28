@@ -1,9 +1,18 @@
-commit 95ecb93
+commit a1ca9a2
+Author: hutch <hutch@midwales.net>
+Date:   Thu Mar 28 19:26:03 2013 +0000
+
+    improved active trail, 1955406
+
+menu_block_split.module
+
+commit e443a27
 Author: hutch <hutch@midwales.net>
 Date:   Tue Feb 12 22:08:06 2013 +0000
 
     fixed issue #1907916
 
+CHANGELOG.txt
 menu_block_split.module
 
 commit dc66b11
