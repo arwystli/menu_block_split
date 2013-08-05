@@ -22,9 +22,9 @@
  * Implements hook_init().
  */
 function menu_block_split_init() {
-  $menu_name = menu_block_split_menu_name();
-  if ($menu_name) {
-    menu_set_active_menu_names(array($menu_name));
+  $menu_names = menu_block_split_menu_name();
+  if ($menu_names) {
+    menu_set_active_menu_names($menu_names);
   }
 }
 
@@ -37,12 +37,16 @@ function menu_block_split_menu_name() {
   $query = db_select('menu_links', 'ml');
   $query->fields('ml', array('menu_name'));
   $query->condition('ml.link_path', $item['href']);
-  $row = $query->execute()->fetchObject();
-  if (is_object($row)) {
-    if (! in_array($row->menu_name, array('navigation', 'admin_menu'))) {
-      return $row->menu_name;
+  $rows = $query->execute()->fetchAll();
+  $rows_to_add = array();
+  foreach ($rows as $row) {
+    if (is_object($row)) {
+      if (! in_array($row->menu_name, array('navigation', 'admin_menu'))) {
+        $rows_to_add[] = $row->menu_name;
+      }
     }
   }
+  return $rows_to_add;
 }
 
 /**
